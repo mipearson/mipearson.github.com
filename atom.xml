@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[My Octopress Blog]]></title>
-  <link href="http://mipearson.github.com/mipearson/atom.xml" rel="self"/>
-  <link href="http://mipearson.github.com/mipearson/"/>
-  <updated>2012-01-09T22:19:26+11:00</updated>
-  <id>http://mipearson.github.com/mipearson/</id>
+  <title><![CDATA[Michael Pearson]]></title>
+  <link href="http://mipearson.github.com//atom.xml" rel="self"/>
+  <link href="http://mipearson.github.com//"/>
+  <updated>2012-01-09T22:22:11+11:00</updated>
+  <id>http://mipearson.github.com//</id>
   <author>
-    <name><![CDATA[Your Name]]></name>
+    <name><![CDATA[Michael Pearson]]></name>
     
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[test]]></title>
-    <link href="http://mipearson.github.com/mipearson/blog/2012/01/09/test/"/>
+    <link href="http://mipearson.github.com//blog/2012/01/09/test/"/>
     <updated>2012-01-09T22:19:00+11:00</updated>
-    <id>http://mipearson.github.com/mipearson/blog/2012/01/09/test</id>
+    <id>http://mipearson.github.com//blog/2012/01/09/test</id>
     <content type="html"><![CDATA[<h1>Whut.</h1>
 ]]></content>
   </entry>
