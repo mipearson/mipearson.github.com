@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Michael Pearson]]></title>
+  <title><![CDATA[mipearson]]></title>
   <link href="http://mipearson.github.com//atom.xml" rel="self"/>
   <link href="http://mipearson.github.com//"/>
-  <updated>2012-01-09T22:22:11+11:00</updated>
+  <updated>2012-01-09T22:23:31+11:00</updated>
   <id>http://mipearson.github.com//</id>
   <author>
     <name><![CDATA[Michael Pearson]]></name>
