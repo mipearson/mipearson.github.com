@@ -4,7 +4,7 @@
   <title><![CDATA[Category: gist | mipearson]]></title>
   <link href="http://mipearson.github.com//blog/categories/gist/atom.xml" rel="self"/>
   <link href="http://mipearson.github.com//"/>
-  <updated>2012-01-10T23:19:32+11:00</updated>
+  <updated>2012-01-10T23:23:49+11:00</updated>
   <id>http://mipearson.github.com//</id>
   <author>
     <name><![CDATA[Michael Pearson]]></name>
@@ -30,7 +30,9 @@
     <link href="http://mipearson.github.com//blog/2011/08/16/nginx-error-codes/"/>
     <updated>2011-08-16T23:04:00+10:00</updated>
     <id>http://mipearson.github.com//blog/2011/08/16/nginx-error-codes</id>
-    <content type="html"><![CDATA[<p>Chuck this in your <code>/etc/munin/plugins</code> and ensure that your <code>/var/nginx/access.log</code> is readable by the user that <code>munin-node</code> runs as:</p>
+    <content type="html"><![CDATA[<p>Place this in your <code>/etc/munin/plugins</code>.</p>
+
+<p>You'll need to ensure that your <code>/var/nginx/access.log</code> is readable by your <code>munin-node</code> user.</p>
 
 <script src="https://gist.github.com/1146151.js"> </script>
 

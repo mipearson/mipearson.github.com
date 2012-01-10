@@ -167,7 +167,9 @@
   </header>
 
 
-  <div class="entry-content"><p>Chuck this in your <code>/etc/munin/plugins</code> and ensure that your <code>/var/nginx/access.log</code> is readable by the user that <code>munin-node</code> runs as:</p>
+  <div class="entry-content"><p>Place this in your <code>/etc/munin/plugins</code>.</p>
+
+<p>You&#8217;ll need to ensure that your <code>/var/nginx/access.log</code> is readable by your <code>munin-node</code> user.</p>
 
 <script src="https://gist.github.com/1146151.js"> </script>
 
@@ -206,28 +208,22 @@
   </header>
 
 
-  <div class="entry-content"><p>So, linode bailed (http://yfrog.com/kkrk4p) while I was in the middle of
-working on the band website (http://www.thebonscotts.com)</p>
+  <div class="entry-content"><p>So, <a href="http://yfrog.com/kkrk4p">linode bailed</a> while I was in the middle of
+working on the <a href="http://www.thebonscotts.com">band website</a>.</p>
 
 <p>That annoyed me somewhat.</p>
 
 <p>Here&#8217;s what I did to move it off linode in under one hour:</p>
 
-<ul>
-<li>logged in to my (already extant) AWS account</li>
-<li>created an elastic IP</li>
-<li>put in a request for a t1.micro spot instance in ap-southeast-1
-(have found it to have the least latency for .au clients)
-Note: spot instances use a &#8216;bidding&#8217; mechanism and might go away.
-Working around this atm by specifying the max bid price as 2x the
-maximum price in the history. Will re-visit with a &#8216;reserved&#8217;
-yearly instance soon.</li>
-<li>logged in to linode</li>
-<li>pointed the thebonscotts.com / www.thebonscotts.com A records to
-the new elastic IP</li>
-<li>waited ~5min for the spot instance to come up</li>
-<li>associated the elastic IP with the spot instance</li>
-</ul>
+<ol>
+<li>Logged in to my (already extant) AWS account</li>
+<li>Created an elastic IP</li>
+<li>Put in a request for a <code>t1.micro</code> spot instance in <code>ap-southeast-1</code> (have found it to have the least latency for .au clients)</li>
+<li>Logged in to linode</li>
+<li>Pointed the thebonscotts.com / www.thebonscotts.com A records to the new elastic IP</li>
+<li>Waited ~5min for the spot instance to come up</li>
+<li>Associated the elastic IP with the spot instance</li>
+</ol>
 
 
 <p>I then logged in to the instance, ran <code>ssh-keygen</code> to create a ssh
@@ -246,6 +242,7 @@ sudo apt-get install apache2-prefork-dev
 sudo apt-get install build-essential libcurl4-openssl-dev zlib1g-dev apache2-mpm-prefork
 sudo /usr/local/bin/passenger-install-apache2-module
 sudo vim /etc/apache2/sites-available/default
+
 # above I copied in the sections from the passenger install
 git clone git@github.com:&lt;REDACTED&gt;
 sudo apt-get install memcached
