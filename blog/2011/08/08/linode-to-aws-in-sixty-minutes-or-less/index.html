@@ -5,12 +5,12 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>test - mipearson</title>
+  <title>Linode to AWS in Sixty Minutes or Less - mipearson</title>
   <meta name="author" content="Michael Pearson">
 
   
-  <meta name="description" content="Whut.
-">
+  <meta name="description" content="So, linode bailed (http://yfrog.com/kkrk4p) while I was in the middle of
+working on the band website (http://www.thebonscotts.com) That annoyed me &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -19,7 +19,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://mipearson.github.com//blog/2012/01/09/test">
+  <link rel="canonical" href="http://mipearson.github.com//blog/2011/08/08/linode-to-aws-in-sixty-minutes-or-less">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <script src="/javascripts/modernizr-2.0.js"></script>
@@ -66,7 +66,7 @@
   
   <header>
     
-      <h1 class="entry-title">Test</h1>
+      <h1 class="entry-title">Linode to AWS in Sixty Minutes or Less</h1>
     
     
       <p class="meta">
@@ -82,14 +82,74 @@
   
 
 
-<time datetime="2012-01-09T22:19:00+11:00" pubdate data-updated="true">Jan 9<span>th</span>, 2012</time>
+<time datetime="2011-08-08T23:14:00+10:00" pubdate data-updated="true">Aug 8<span>th</span>, 2011</time>
         
       </p>
     
   </header>
 
 
-<div class="entry-content"><h1>Whut.</h1>
+<div class="entry-content"><p>So, linode bailed (http://yfrog.com/kkrk4p) while I was in the middle of
+working on the band website (http://www.thebonscotts.com)</p>
+
+<p>That annoyed me somewhat.</p>
+
+<p>Here&#8217;s what I did to move it off linode in under one hour:</p>
+
+<ul>
+<li>logged in to my (already extant) AWS account</li>
+<li>created an elastic IP</li>
+<li>put in a request for a t1.micro spot instance in ap-southeast-1
+(have found it to have the least latency for .au clients)
+Note: spot instances use a &#8216;bidding&#8217; mechanism and might go away.
+Working around this atm by specifying the max bid price as 2x the
+maximum price in the history. Will re-visit with a &#8216;reserved&#8217;
+yearly instance soon.</li>
+<li>logged in to linode</li>
+<li>pointed the thebonscotts.com / www.thebonscotts.com A records to
+the new elastic IP</li>
+<li>waited ~5min for the spot instance to come up</li>
+<li>associated the elastic IP with the spot instance</li>
+</ul>
+
+
+<p>I then logged in to the instance, ran <code>ssh-keygen</code> to create a ssh
+key, and added that key to my github project&#8217;s deploy keyset.</p>
+
+<p>I then ran these commands:</p>
+
+<pre><code>sudo apt-get update
+sudo apt-get install git-core
+wget http://rubyenterpriseedition.googlecode.com/files/ruby-enterprise_1.8.7-2011.03_amd64_ubuntu10.04.deb
+sudo dpkg --install ruby-enterprise_1.8.7-2011.03_amd64_ubuntu10.04.deb 
+sudo gem update --system
+sudo gem install bundler --no-rdoc --no-ri
+sudo gem install passenger --no-rdoc --no-ri
+sudo apt-get install apache2-prefork-dev
+sudo apt-get install build-essential libcurl4-openssl-dev zlib1g-dev apache2-mpm-prefork
+sudo /usr/local/bin/passenger-install-apache2-module
+sudo vim /etc/apache2/sites-available/default
+# above I copied in the sections from the passenger install
+git clone git@github.com:&lt;REDACTED&gt;
+sudo apt-get install memcached
+sudo update-rc.d memcached defaults
+sudo update-rc.d apache2 defaults
+cd bonscotts/
+bundle install
+sudo /etc/init.d/apache2 restart
+</code></pre>
+
+<p>Easy!</p>
+
+<p>Probably would have been easier if I&#8217;d had a puppet or chef recipe.</p>
+
+<p>&#8211;</p>
+
+<h3>Postscript</h3>
+
+<p>I didn&#8217;t create a snapshot of the instance. A month later, when the AWS spot instance price exceeded my maximum bid, the instance was terminated and I had to repeat the above process.</p>
+
+<p>Fortunately I had the above instructions archived on <a href="http://gist.github.com">github</a>.</p>
 </div>
 
 
@@ -112,15 +172,21 @@
   
 
 
-<time datetime="2012-01-09T22:19:00+11:00" pubdate data-updated="true">Jan 9<span>th</span>, 2012</time>
+<time datetime="2011-08-08T23:14:00+10:00" pubdate data-updated="true">Aug 8<span>th</span>, 2011</time>
       
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/devops/'>devops</a>
+  
+</span>
 
 
     </p>
     
       <div class="sharing">
   
-  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://mipearson.github.com//blog/2012/01/09/test/" data-via="mipearson" data-counturl="http://mipearson.github.com//blog/2012/01/09/test/" >Tweet</a>
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://mipearson.github.com//blog/2011/08/08/linode-to-aws-in-sixty-minutes-or-less/" data-via="mipearson" data-counturl="http://mipearson.github.com//blog/2011/08/08/linode-to-aws-in-sixty-minutes-or-less/" >Tweet</a>
   
   
   
@@ -129,8 +195,8 @@
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/2011/08/18/discovering-un-pushed-git-repositories/" title="Previous Post: Discovering Un-Pushed git Repositories">&laquo; Discovering Un-Pushed git Repositories</a>
       
+        <a class="basic-alignment right" href="/blog/2011/08/16/nginx-error-codes/" title="next Post: Munin Plugin to Track Nginx Error Code Frequency">Munin Plugin to Track Nginx Error Code Frequency &raquo;</a>
       
     </p>
   </footer>

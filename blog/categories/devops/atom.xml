@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[mipearson]]></title>
-  <link href="http://mipearson.github.com//atom.xml" rel="self"/>
+  <title><![CDATA[Category: devops | mipearson]]></title>
+  <link href="http://mipearson.github.com//blog/categories/devops/atom.xml" rel="self"/>
   <link href="http://mipearson.github.com//"/>
   <updated>2012-01-10T23:19:32+11:00</updated>
   <id>http://mipearson.github.com//</id>
@@ -12,27 +12,6 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
-  
-  <entry>
-    <title type="html"><![CDATA[test]]></title>
-    <link href="http://mipearson.github.com//blog/2012/01/09/test/"/>
-    <updated>2012-01-09T22:19:00+11:00</updated>
-    <id>http://mipearson.github.com//blog/2012/01/09/test</id>
-    <content type="html"><![CDATA[<h1>Whut.</h1>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Discovering Un-Pushed git Repositories]]></title>
-    <link href="http://mipearson.github.com//blog/2011/08/18/discovering-un-pushed-git-repositories/"/>
-    <updated>2011-08-18T23:04:00+10:00</updated>
-    <id>http://mipearson.github.com//blog/2011/08/18/discovering-un-pushed-git-repositories</id>
-    <content type="html"><![CDATA[<p>A small script to discover any repositories in the current directory with an un-pushed current branch:</p>
-
-<script src="https://gist.github.com/1153008.js"> </script>
-
-]]></content>
-  </entry>
   
   <entry>
     <title type="html"><![CDATA[Munin Plugin to Track Nginx Error Code Frequency]]></title>
@@ -56,16 +35,16 @@ working on the band website (http://www.thebonscotts.com)</p>
 
 <p>That annoyed me somewhat.</p>
 
-<p>Here&#8217;s what I did to move it off linode in under one hour:</p>
+<p>Here's what I did to move it off linode in under one hour:</p>
 
 <ul>
 <li>logged in to my (already extant) AWS account</li>
 <li>created an elastic IP</li>
 <li>put in a request for a t1.micro spot instance in ap-southeast-1
 (have found it to have the least latency for .au clients)
-Note: spot instances use a &#8216;bidding&#8217; mechanism and might go away.
+Note: spot instances use a 'bidding' mechanism and might go away.
 Working around this atm by specifying the max bid price as 2x the
-maximum price in the history. Will re-visit with a &#8216;reserved&#8217;
+maximum price in the history. Will re-visit with a 'reserved'
 yearly instance soon.</li>
 <li>logged in to linode</li>
 <li>pointed the thebonscotts.com / www.thebonscotts.com A records to
@@ -76,7 +55,7 @@ the new elastic IP</li>
 
 
 <p>I then logged in to the instance, ran <code>ssh-keygen</code> to create a ssh
-key, and added that key to my github project&#8217;s deploy keyset.</p>
+key, and added that key to my github project's deploy keyset.</p>
 
 <p>I then ran these commands:</p>
 
@@ -103,13 +82,13 @@ sudo /etc/init.d/apache2 restart
 
 <p>Easy!</p>
 
-<p>Probably would have been easier if I&#8217;d had a puppet or chef recipe.</p>
+<p>Probably would have been easier if I'd had a puppet or chef recipe.</p>
 
-<p>&#8211;</p>
+<p>--</p>
 
 <h3>Postscript</h3>
 
-<p>I didn&#8217;t create a snapshot of the instance. A month later, when the AWS spot instance price exceeded my maximum bid, the instance was terminated and I had to repeat the above process.</p>
+<p>I didn't create a snapshot of the instance. A month later, when the AWS spot instance price exceeded my maximum bid, the instance was terminated and I had to repeat the above process.</p>
 
 <p>Fortunately I had the above instructions archived on <a href="http://gist.github.com">github</a>.</p>
 ]]></content>
