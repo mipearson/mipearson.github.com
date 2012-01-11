@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[mipearson]]></title>
+  <title><![CDATA[Michael Pearson]]></title>
   <link href="http://mipearson.github.com//atom.xml" rel="self"/>
   <link href="http://mipearson.github.com//"/>
-  <updated>2012-01-10T23:24:09+11:00</updated>
+  <updated>2012-01-11T21:35:43+11:00</updated>
   <id>http://mipearson.github.com//</id>
   <author>
     <name><![CDATA[Michael Pearson]]></name>
@@ -14,7 +14,7 @@
 
   
   <entry>
-    <title type="html"><![CDATA[Discovering Un-Pushed git Repositories]]></title>
+    <title type="html"><![CDATA[Discover Un-Pushed git Repositories]]></title>
     <link href="http://mipearson.github.com//blog/2011/08/18/discovering-un-pushed-git-repositories/"/>
     <updated>2011-08-18T23:04:00+10:00</updated>
     <id>http://mipearson.github.com//blog/2011/08/18/discovering-un-pushed-git-repositories</id>
@@ -26,7 +26,7 @@
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Munin Plugin to Track Nginx Error Code Frequency]]></title>
+    <title type="html"><![CDATA[Tracking Nginx Error Code Frequency with Munin]]></title>
     <link href="http://mipearson.github.com//blog/2011/08/16/nginx-error-codes/"/>
     <updated>2011-08-16T23:04:00+10:00</updated>
     <id>http://mipearson.github.com//blog/2011/08/16/nginx-error-codes</id>
