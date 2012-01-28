@@ -48,6 +48,6 @@ SkyBox::midday =
   bottom: [244,252,251]
   
 
-skyBox = new SkyBox('body', '#bg1', '#bg2')
+skyBox = new SkyBox('#bg0', '#bg1', '#bg2')
 now = new Date()
 skyBox.render(now.getHours() + now.getMinutes() / 60)
