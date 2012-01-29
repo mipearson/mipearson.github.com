@@ -9,7 +9,19 @@
   <meta name="author" content="Michael Pearson">
 
   
-  <meta name="description" content="A small script to discover any repositories in the current directory with an un-pushed current branch: ">
+  <meta name="description" content="A small script to discover any repositories in the current directory with an un-pushed current branch: 1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+#!/usr/bin/env ruby &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -99,7 +111,31 @@
 
   <div class="entry-content"><p>A small script to discover any repositories in the current directory with an un-pushed current branch:</p>
 
-<script src="https://gist.github.com/1153008.js"> </script>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#!/usr/bin/env ruby</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">pwd</span> <span class="o">=</span> <span class="no">ARGV</span><span class="o">[</span><span class="mi">0</span><span class="o">]</span> <span class="o">||</span> <span class="s1">&#39;.&#39;</span>
+</span><span class='line'><span class="n">debug</span> <span class="o">=</span> <span class="no">ARGV</span><span class="o">[</span><span class="mi">1</span><span class="o">]</span> <span class="o">==</span> <span class="s1">&#39;-d&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">Dir</span><span class="o">[</span><span class="no">File</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">pwd</span><span class="p">,</span> <span class="s1">&#39;**&#39;</span><span class="p">,</span> <span class="s1">&#39;.git&#39;</span><span class="p">)</span><span class="o">].</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">repo</span><span class="o">|</span>
+</span><span class='line'>  <span class="n">repo</span><span class="o">.</span><span class="n">gsub!</span><span class="p">(</span><span class="sr">/\.git$/</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+</span><span class='line'>  <span class="vg">$stderr</span><span class="o">.</span><span class="n">puts</span> <span class="s2">&quot;in </span><span class="si">#{</span><span class="n">repo</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="n">debug</span>
+</span><span class='line'>  <span class="k">if</span> <span class="sb">`cd </span><span class="si">#{</span><span class="n">repo</span><span class="si">}</span><span class="sb">; git status`</span><span class="o">.</span><span class="n">include?</span><span class="p">(</span><span class="s2">&quot;Your branch is ahead of&quot;</span><span class="p">)</span>
+</span><span class='line'>    <span class="nb">puts</span> <span class="n">repo</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
 
 </div>
   
@@ -139,6 +175,99 @@
   <div class="entry-content"><p>Place this in your <code>/etc/munin/plugins</code>.</p>
 
 <p>You&#8217;ll need to ensure that your <code>/var/nginx/access.log</code> is readable by your <code>munin-node</code> user.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#!/usr/bin/env ruby</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">CODES</span> <span class="o">=</span> <span class="p">{</span>
+</span><span class='line'>  <span class="s1">&#39;400&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;Bad Request&#39;</span><span class="p">,</span>
+</span><span class='line'>  <span class="s1">&#39;401&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;Unauthorized&#39;</span><span class="p">,</span>
+</span><span class='line'>  <span class="s1">&#39;403&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;Forbidden&#39;</span><span class="p">,</span>
+</span><span class='line'>  <span class="s1">&#39;404&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;Not Found&#39;</span><span class="p">,</span>
+</span><span class='line'>  <span class="s1">&#39;405&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;Method Not Allowed&#39;</span><span class="p">,</span>
+</span><span class='line'>  <span class="s1">&#39;406&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;Not Acceptable&#39;</span><span class="p">,</span>
+</span><span class='line'>  <span class="s1">&#39;408&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;Request Timeout&#39;</span><span class="p">,</span>
+</span><span class='line'>  <span class="s1">&#39;499&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;Client Connection Terminated&#39;</span><span class="p">,</span>
+</span><span class='line'>  <span class="s1">&#39;500&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;Internal Server Error&#39;</span><span class="p">,</span>
+</span><span class='line'>  <span class="s1">&#39;502&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;Bad Gateway&#39;</span><span class="p">,</span>
+</span><span class='line'>  <span class="s1">&#39;503&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;Service Unavailable&#39;</span><span class="p">,</span>
+</span><span class='line'>  <span class="s1">&#39;Other&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;Other responses&#39;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">if</span> <span class="no">ARGV</span><span class="o">[</span><span class="mi">0</span><span class="o">]</span> <span class="o">==</span> <span class="s1">&#39;config&#39;</span><span class="p">;</span> <span class="k">then</span>
+</span><span class='line'>  <span class="nb">puts</span> <span class="s2">&quot;graph_title nginx Error Codes&quot;</span>
+</span><span class='line'>  <span class="nb">puts</span> <span class="s2">&quot;graph_vlabel responses per minute&quot;</span>
+</span><span class='line'>  <span class="nb">puts</span> <span class="s2">&quot;graph_category nginx&quot;</span>
+</span><span class='line'>  <span class="nb">puts</span> <span class="s2">&quot;graph_period minute&quot;</span>
+</span><span class='line'>  <span class="nb">puts</span> <span class="s2">&quot;graph_info Non-200 response codes per minute&quot;</span>
+</span><span class='line'>  <span class="no">CODES</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">code</span><span class="p">,</span> <span class="n">desc</span><span class="o">|</span>
+</span><span class='line'>    <span class="nb">puts</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="n">code</span><span class="si">}</span><span class="s2">.label </span><span class="si">#{</span><span class="n">code</span><span class="si">}</span><span class="s2"> </span><span class="si">#{</span><span class="n">desc</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>    <span class="nb">puts</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="n">code</span><span class="si">}</span><span class="s2">.type DERIVE&quot;</span>
+</span><span class='line'>    <span class="nb">puts</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="n">code</span><span class="si">}</span><span class="s2">.min 0&quot;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">else</span>
+</span><span class='line'>  <span class="n">results</span> <span class="o">=</span> <span class="no">Hash</span><span class="o">[*</span><span class="no">CODES</span><span class="o">.</span><span class="n">keys</span><span class="o">.</span><span class="n">map</span> <span class="p">{</span> <span class="o">|</span><span class="n">k</span><span class="o">|</span> <span class="o">[</span><span class="n">k</span><span class="p">,</span> <span class="mi">0</span><span class="o">]</span><span class="p">}</span><span class="o">.</span><span class="n">flatten</span><span class="o">]</span>
+</span><span class='line'>  <span class="no">File</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;/var/log/nginx/access.log&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">readlines</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">line</span><span class="o">|</span>
+</span><span class='line'>    <span class="k">if</span> <span class="n">line</span> <span class="o">=~</span> <span class="sr">/&quot; (\d\d\d)/</span>
+</span><span class='line'>      <span class="n">code</span> <span class="o">=</span> <span class="vg">$1</span>
+</span><span class='line'>      <span class="k">if</span> <span class="no">CODES</span><span class="o">.</span><span class="n">keys</span><span class="o">.</span><span class="n">include?</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">results</span><span class="o">[</span><span class="n">code</span><span class="o">]</span> <span class="o">+=</span> <span class="mi">1</span>
+</span><span class='line'>      <span class="k">elsif</span> <span class="n">code</span><span class="o">.</span><span class="n">to_i</span> <span class="o">&gt;=</span> <span class="mi">400</span>
+</span><span class='line'>        <span class="n">results</span><span class="o">[</span><span class="s1">&#39;Other&#39;</span><span class="o">]</span> <span class="o">+=</span> <span class="mi">1</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">results</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="o">|</span>
+</span><span class='line'>    <span class="nb">puts</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="n">k</span><span class="si">}</span><span class="s2">.value </span><span class="si">#{</span><span class="n">v</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
 
 <script src="https://gist.github.com/1146151.js"> </script>
 
@@ -200,27 +329,48 @@ key, and added that key to my github project&#8217;s deploy keyset.</p>
 
 <p>I then ran these commands:</p>
 
-<pre><code>sudo apt-get update
-sudo apt-get install git-core
-wget http://rubyenterpriseedition.googlecode.com/files/ruby-enterprise_1.8.7-2011.03_amd64_ubuntu10.04.deb
-sudo dpkg --install ruby-enterprise_1.8.7-2011.03_amd64_ubuntu10.04.deb 
-sudo gem update --system
-sudo gem install bundler --no-rdoc --no-ri
-sudo gem install passenger --no-rdoc --no-ri
-sudo apt-get install apache2-prefork-dev
-sudo apt-get install build-essential libcurl4-openssl-dev zlib1g-dev apache2-mpm-prefork
-sudo /usr/local/bin/passenger-install-apache2-module
-sudo vim /etc/apache2/sites-available/default
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>sudo apt-get update
+</span><span class='line'>sudo apt-get install git-core
+</span><span class='line'>wget http://rubyenterpriseedition.googlecode.com/files/ruby-enterprise_1.8.7-2011.03_amd64_ubuntu10.04.deb
+</span><span class='line'>sudo dpkg --install ruby-enterprise_1.8.7-2011.03_amd64_ubuntu10.04.deb
+</span><span class='line'>sudo gem update --system
+</span><span class='line'>sudo gem install bundler --no-rdoc --no-ri
+</span><span class='line'>sudo gem install passenger --no-rdoc --no-ri
+</span><span class='line'>sudo apt-get install apache2-prefork-dev
+</span><span class='line'>sudo apt-get install build-essential libcurl4-openssl-dev zlib1g-dev apache2-mpm-prefork
+</span><span class='line'>sudo /usr/local/bin/passenger-install-apache2-module
+</span><span class='line'>sudo vim /etc/apache2/sites-available/default
+</span><span class='line'>
+</span><span class='line'><span class="c"># above I copied in the sections from the passenger install</span>
+</span><span class='line'>git clone git@github.com:&lt;REDACTED&gt;
+</span><span class='line'>sudo apt-get install memcached
+</span><span class='line'>sudo update-rc.d memcached defaults
+</span><span class='line'>sudo update-rc.d apache2 defaults
+</span><span class='line'><span class="nb">cd </span>bonscotts/
+</span><span class='line'>bundle install
+</span><span class='line'>sudo /etc/init.d/apache2 restart
+</span></code></pre></td></tr></table></div></figure>
 
-# above I copied in the sections from the passenger install
-git clone git@github.com:&lt;REDACTED&gt;
-sudo apt-get install memcached
-sudo update-rc.d memcached defaults
-sudo update-rc.d apache2 defaults
-cd bonscotts/
-bundle install
-sudo /etc/init.d/apache2 restart
-</code></pre>
 
 <p>Easy!</p>
 
@@ -357,6 +507,5 @@ sudo /etc/init.d/apache2 restart
   </div>
   <div id="bg0"></div>
   <div id="bg1"></div>
-  <div id="bg2"></div>
 </body>
 </html>

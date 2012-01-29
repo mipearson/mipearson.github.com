@@ -118,27 +118,48 @@ key, and added that key to my github project&#8217;s deploy keyset.</p>
 
 <p>I then ran these commands:</p>
 
-<pre><code>sudo apt-get update
-sudo apt-get install git-core
-wget http://rubyenterpriseedition.googlecode.com/files/ruby-enterprise_1.8.7-2011.03_amd64_ubuntu10.04.deb
-sudo dpkg --install ruby-enterprise_1.8.7-2011.03_amd64_ubuntu10.04.deb 
-sudo gem update --system
-sudo gem install bundler --no-rdoc --no-ri
-sudo gem install passenger --no-rdoc --no-ri
-sudo apt-get install apache2-prefork-dev
-sudo apt-get install build-essential libcurl4-openssl-dev zlib1g-dev apache2-mpm-prefork
-sudo /usr/local/bin/passenger-install-apache2-module
-sudo vim /etc/apache2/sites-available/default
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>sudo apt-get update
+</span><span class='line'>sudo apt-get install git-core
+</span><span class='line'>wget http://rubyenterpriseedition.googlecode.com/files/ruby-enterprise_1.8.7-2011.03_amd64_ubuntu10.04.deb
+</span><span class='line'>sudo dpkg --install ruby-enterprise_1.8.7-2011.03_amd64_ubuntu10.04.deb
+</span><span class='line'>sudo gem update --system
+</span><span class='line'>sudo gem install bundler --no-rdoc --no-ri
+</span><span class='line'>sudo gem install passenger --no-rdoc --no-ri
+</span><span class='line'>sudo apt-get install apache2-prefork-dev
+</span><span class='line'>sudo apt-get install build-essential libcurl4-openssl-dev zlib1g-dev apache2-mpm-prefork
+</span><span class='line'>sudo /usr/local/bin/passenger-install-apache2-module
+</span><span class='line'>sudo vim /etc/apache2/sites-available/default
+</span><span class='line'>
+</span><span class='line'><span class="c"># above I copied in the sections from the passenger install</span>
+</span><span class='line'>git clone git@github.com:&lt;REDACTED&gt;
+</span><span class='line'>sudo apt-get install memcached
+</span><span class='line'>sudo update-rc.d memcached defaults
+</span><span class='line'>sudo update-rc.d apache2 defaults
+</span><span class='line'><span class="nb">cd </span>bonscotts/
+</span><span class='line'>bundle install
+</span><span class='line'>sudo /etc/init.d/apache2 restart
+</span></code></pre></td></tr></table></div></figure>
 
-# above I copied in the sections from the passenger install
-git clone git@github.com:&lt;REDACTED&gt;
-sudo apt-get install memcached
-sudo update-rc.d memcached defaults
-sudo update-rc.d apache2 defaults
-cd bonscotts/
-bundle install
-sudo /etc/init.d/apache2 restart
-</code></pre>
 
 <p>Easy!</p>
 
@@ -317,6 +338,5 @@ sudo /etc/init.d/apache2 restart
   </div>
   <div id="bg0"></div>
   <div id="bg1"></div>
-  <div id="bg2"></div>
 </body>
 </html>

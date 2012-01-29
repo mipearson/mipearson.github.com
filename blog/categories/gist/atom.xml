@@ -4,7 +4,7 @@
   <title><![CDATA[Category: gist | Michael Pearson]]></title>
   <link href="http://mipearson.github.com//blog/categories/gist/atom.xml" rel="self"/>
   <link href="http://mipearson.github.com//"/>
-  <updated>2012-01-28T12:16:39+11:00</updated>
+  <updated>2012-01-30T07:47:59+11:00</updated>
   <id>http://mipearson.github.com//</id>
   <author>
     <name><![CDATA[Michael Pearson]]></name>
@@ -20,8 +20,24 @@
     <id>http://mipearson.github.com//blog/2011/08/18/discovering-un-pushed-git-repositories</id>
     <content type="html"><![CDATA[<p>A small script to discover any repositories in the current directory with an un-pushed current branch:</p>
 
-<script src="https://gist.github.com/1153008.js"> </script>
+<p>``` ruby</p>
 
+<h1>!/usr/bin/env ruby</h1>
+
+<p>pwd = ARGV[0] || '.'
+debug = ARGV[1] == '-d'</p>
+
+<p>Dir[File.join(pwd, '**', '.git')].each do |repo|
+  repo.gsub!(/.git$/, '')
+  $stderr.puts "in #{repo}" if debug
+  if <code>cd #{repo}; git status</code>.include?("Your branch is ahead of")</p>
+
+<pre><code>puts repo
+</code></pre>
+
+<p>  end
+end
+```</p>
 ]]></content>
   </entry>
   
@@ -33,6 +49,64 @@
     <content type="html"><![CDATA[<p>Place this in your <code>/etc/munin/plugins</code>.</p>
 
 <p>You'll need to ensure that your <code>/var/nginx/access.log</code> is readable by your <code>munin-node</code> user.</p>
+
+<p>``` ruby</p>
+
+<h1>!/usr/bin/env ruby</h1>
+
+<p>CODES = {
+  '400' => 'Bad Request',
+  '401' => 'Unauthorized',
+  '403' => 'Forbidden',
+  '404' => 'Not Found',
+  '405' => 'Method Not Allowed',
+  '406' => 'Not Acceptable',
+  '408' => 'Request Timeout',
+  '499' => 'Client Connection Terminated',
+  '500' => 'Internal Server Error',
+  '502' => 'Bad Gateway',
+  '503' => 'Service Unavailable',
+  'Other' => 'Other responses'
+}</p>
+
+<p>if ARGV[0] == 'config'; then
+  puts "graph_title nginx Error Codes"
+  puts "graph_vlabel responses per minute"
+  puts "graph_category nginx"
+  puts "graph_period minute"
+  puts "graph_info Non-200 response codes per minute"
+  CODES.each do |code, desc|</p>
+
+<pre><code>puts "#{code}.label #{code} #{desc}"
+puts "#{code}.type DERIVE"
+puts "#{code}.min 0"
+</code></pre>
+
+<p>  end
+else
+  results = Hash[*CODES.keys.map { |k| [k, 0]}.flatten]
+  File.open("/var/log/nginx/access.log").readlines.each do |line|</p>
+
+<pre><code>if line =~ /" (\d\d\d)/
+  code = $1
+  if CODES.keys.include?(code)
+results[code] += 1
+  elsif code.to_i &gt;= 400
+    results['Other'] += 1
+  end
+end
+</code></pre>
+
+<p>  end</p>
+
+<p>  results.each do |k,v|</p>
+
+<pre><code>puts "#{k}.value #{v}"
+</code></pre>
+
+<p>  end
+end
+```</p>
 
 <script src="https://gist.github.com/1146151.js"> </script>
 

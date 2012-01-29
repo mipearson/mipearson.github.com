@@ -1,7 +1,6 @@
-SkyBox = (gradientSelector, hillsSelector, hillsShadowSelector) ->
+SkyBox = (gradientSelector, hillsSelector) ->
   @gradientSelector = gradientSelector
   @hillsSelector = hillsSelector
-  @hillsShadowSelector = hillsShadowSelector
   
 SkyBox::computeColour = (colourFrom, colourTo, percent) ->
   colours = for idx in [0..2]
@@ -19,8 +18,8 @@ SkyBox::setSkyGradient = (colourFrom, colourTo, percent) ->
   $(@gradientSelector).css(background: "-moz-linear-gradient#{gradientString}")
   
 SkyBox::setHills = (darkPercent) -> 
-   $(@hillsSelector).css(background: 'url(../images/hillslight.png) repeat-x bottom left');
-   $(@hillsShadowSelector).css(background: 'url(../images/hillsdark.png) repeat-x bottom left').css(opacity: darkPercent);
+  hillNumber = Math.round(darkPercent * 4)
+  $(@hillsSelector).css(background: "url(../images/hills#{hillNumber}.png) repeat-x bottom left");
 
 SkyBox::render = (hour) ->
   if hour < 7
@@ -46,8 +45,7 @@ SkyBox::sunrise =
 SkyBox::midday = 
   top: [135,224,253]
   bottom: [244,252,251]
-  
 
-skyBox = new SkyBox('#bg0', '#bg1', '#bg2')
+skyBox = new SkyBox('#bg0', '#bg1')
 now = new Date()
 skyBox.render(now.getHours() + now.getMinutes() / 60)

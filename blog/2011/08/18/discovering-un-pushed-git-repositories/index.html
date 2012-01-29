@@ -9,7 +9,19 @@
   <meta name="author" content="Michael Pearson">
 
   
-  <meta name="description" content="A small script to discover any repositories in the current directory with an un-pushed current branch: ">
+  <meta name="description" content="A small script to discover any repositories in the current directory with an un-pushed current branch: 1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+#!/usr/bin/env ruby &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -96,7 +108,31 @@
 
 <div class="entry-content"><p>A small script to discover any repositories in the current directory with an un-pushed current branch:</p>
 
-<script src="https://gist.github.com/1153008.js"> </script>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#!/usr/bin/env ruby</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">pwd</span> <span class="o">=</span> <span class="no">ARGV</span><span class="o">[</span><span class="mi">0</span><span class="o">]</span> <span class="o">||</span> <span class="s1">&#39;.&#39;</span>
+</span><span class='line'><span class="n">debug</span> <span class="o">=</span> <span class="no">ARGV</span><span class="o">[</span><span class="mi">1</span><span class="o">]</span> <span class="o">==</span> <span class="s1">&#39;-d&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">Dir</span><span class="o">[</span><span class="no">File</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">pwd</span><span class="p">,</span> <span class="s1">&#39;**&#39;</span><span class="p">,</span> <span class="s1">&#39;.git&#39;</span><span class="p">)</span><span class="o">].</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">repo</span><span class="o">|</span>
+</span><span class='line'>  <span class="n">repo</span><span class="o">.</span><span class="n">gsub!</span><span class="p">(</span><span class="sr">/\.git$/</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+</span><span class='line'>  <span class="vg">$stderr</span><span class="o">.</span><span class="n">puts</span> <span class="s2">&quot;in </span><span class="si">#{</span><span class="n">repo</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="n">debug</span>
+</span><span class='line'>  <span class="k">if</span> <span class="sb">`cd </span><span class="si">#{</span><span class="n">repo</span><span class="si">}</span><span class="sb">; git status`</span><span class="o">.</span><span class="n">include?</span><span class="p">(</span><span class="s2">&quot;Your branch is ahead of&quot;</span><span class="p">)</span>
+</span><span class='line'>    <span class="nb">puts</span> <span class="n">repo</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
 
 </div>
 
@@ -264,6 +300,5 @@
   </div>
   <div id="bg0"></div>
   <div id="bg1"></div>
-  <div id="bg2"></div>
 </body>
 </html>
