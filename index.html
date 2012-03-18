@@ -9,19 +9,7 @@
   <meta name="author" content="Michael Pearson">
 
   
-  <meta name="description" content="A small script to discover any repositories in the current directory with an un-pushed current branch: 1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-#!/usr/bin/env ruby &hellip;">
+  <meta name="description" content="We deploy to our test environment generally between five and twenty times a day. As we like our test environment to provide a solid indicator of &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -80,6 +68,172 @@
       <div id="content">
         <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/03/18/reducing-asset-precompilation-time/">Reducing Asset Precompilation Time</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-03-18T21:10:00+11:00" pubdate data-updated="true">Mar 18<span>th</span>, 2012</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>We deploy to our test environment generally between five and twenty times a day. As we like our test environment to provide a solid indicator of production-readiness, we try to match our test environment as close to production as we can.</p>
+
+<p>This, of course, means using the same Rails asset precompilation on a test deploy as on a production deploy. Unfortunately, this can take a while:</p>
+
+<pre><code>$ time rake assets:precompile
+...
+real  4m14.866s
+user  5m52.794s
+sys   0m31.324s
+</code></pre>
+
+<p>Last week I found, fixed and resolved a bug in the time it took for a deployment to complete. This annoyed me, so I set out to see if I could reduce our asset precompilation time, and by extension our deployment time.</p>
+
+<p>First I look in <code>rails/actionpack/lib/sprockets/assets.rake</code> and find one huge smell: the compilation is run twice! It&#8217;s run once for assets, appending a digest path, and then again without a digest path.</p>
+
+<p>Doing a bit of digging on this I find this isn&#8217;t necessary for our case: everything in <code>public/assets</code> is called using one of the asset helpers, which will read <code>manifest.yml</code> and determine the correct (digested) path for the asset. Unless we start using assets from a &#8216;static&#8217; source (eg, from an email) we&#8217;re safe to turn off the &#8216;nondigest&#8217; run. In fact, it looks like there&#8217;s a <a href="https://github.com/rails/rails/pull/5379">movement to make this the default</a>.</p>
+
+<p>Unfortunately, running <code>rake assets:precompile:primary</code> gives us an error about a missing <code>bootstrap-dropdown.js</code>. Investigating further I find that <code>rake assets:precompile</code> does some set up for us. It:</p>
+
+<ul>
+<li>sets the Rails environment to <code>production</code>,</li>
+<li>ensures that Bundler loads the <code>assets</code> group and</li>
+<li>re-invokes rake to apply these changes.</li>
+</ul>
+
+
+<p>Appending <code>RAILS_ENV=production RAILS_GROUPS=assets</code> to our <code>rake assets:precompile:primary</code> command fixes the missing file error.</p>
+
+<p>This halves our precompilation time:</p>
+
+<pre><code>real  2m0.908s
+user  2m51.986s
+sys   0m14.973s
+</code></pre>
+
+<p>Now, let&#8217;s see where Sprockets is spending all of its time. I overrode the <code>Sprockets::StaticCompiler#compile</code> method to print out how long Sprockets spent with each file:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">if</span> <span class="no">ENV</span><span class="o">[</span><span class="s1">&#39;TRACK_PRECOMPILE_ASSETS&#39;</span><span class="o">]</span>
+</span><span class='line'>  <span class="k">module</span> <span class="nn">Sprockets</span>
+</span><span class='line'>    <span class="k">class</span> <span class="nc">StaticCompiler</span>
+</span><span class='line'>      <span class="k">def</span> <span class="nf">compile</span>
+</span><span class='line'>        <span class="n">manifest</span> <span class="o">=</span> <span class="p">{}</span>
+</span><span class='line'>        <span class="n">start_process</span> <span class="o">=</span> <span class="no">Time</span><span class="o">.</span><span class="n">now</span>
+</span><span class='line'>        <span class="n">total_time_taken</span> <span class="o">=</span> <span class="mi">0</span>
+</span><span class='line'>        <span class="n">env</span><span class="o">.</span><span class="n">each_logical_path</span> <span class="k">do</span> <span class="o">|</span><span class="n">logical_path</span><span class="o">|</span>
+</span><span class='line'>          <span class="k">next</span> <span class="k">unless</span> <span class="n">compile_path?</span><span class="p">(</span><span class="n">logical_path</span><span class="p">)</span>
+</span><span class='line'>          <span class="n">start_file</span> <span class="o">=</span> <span class="no">Time</span><span class="o">.</span><span class="n">now</span>
+</span><span class='line'>          <span class="k">if</span> <span class="n">asset</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">find_asset</span><span class="p">(</span><span class="n">logical_path</span><span class="p">)</span>
+</span><span class='line'>            <span class="n">post_find</span> <span class="o">=</span> <span class="no">Time</span><span class="o">.</span><span class="n">now</span>
+</span><span class='line'>            <span class="n">manifest</span><span class="o">[</span><span class="n">logical_path</span><span class="o">]</span> <span class="o">=</span> <span class="n">write_asset</span><span class="p">(</span><span class="n">asset</span><span class="p">)</span>
+</span><span class='line'>            <span class="n">post_write</span> <span class="o">=</span> <span class="no">Time</span><span class="o">.</span><span class="n">now</span>
+</span><span class='line'>            <span class="n">time_taken</span> <span class="o">=</span> <span class="n">post_write</span> <span class="o">-</span> <span class="n">start_file</span>
+</span><span class='line'>            <span class="n">percent_in_write</span> <span class="o">=</span> <span class="p">(</span><span class="n">post_write</span> <span class="o">-</span> <span class="n">post_find</span><span class="p">)</span> <span class="o">/</span> <span class="n">time_taken</span>
+</span><span class='line'>            <span class="n">total_time_taken</span> <span class="o">+=</span> <span class="n">time_taken</span>
+</span><span class='line'>            <span class="n">time_taken_s</span> <span class="o">=</span> <span class="nb">sprintf</span> <span class="s2">&quot;%0.2f&quot;</span><span class="p">,</span> <span class="n">time_taken</span> <span class="o">*</span> <span class="mi">1000</span>
+</span><span class='line'>            <span class="n">percent_in_write_s</span> <span class="o">=</span> <span class="nb">sprintf</span> <span class="s2">&quot;%0.2f&quot;</span><span class="p">,</span> <span class="n">percent_in_write</span> <span class="o">*</span> <span class="mi">100</span>
+</span><span class='line'>            <span class="vg">$stderr</span><span class="o">.</span><span class="n">puts</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="n">logical_path</span><span class="si">}</span><span class="s2">: </span><span class="si">#{</span><span class="n">time_taken_s</span><span class="si">}</span><span class="s2"> </span><span class="si">#{</span><span class="n">percent_in_write_s</span><span class="si">}</span><span class="s2">%&quot;</span>
+</span><span class='line'>          <span class="k">end</span>
+</span><span class='line'>        <span class="k">end</span>
+</span><span class='line'>        <span class="n">write_manifest</span><span class="p">(</span><span class="n">manifest</span><span class="p">)</span> <span class="k">if</span> <span class="vi">@manifest</span>
+</span><span class='line'>        <span class="vg">$stderr</span><span class="o">.</span><span class="n">puts</span> <span class="s2">&quot;TOTAL: </span><span class="si">#{</span><span class="no">Time</span><span class="o">.</span><span class="n">now</span> <span class="o">-</span> <span class="n">start_process</span><span class="si">}</span><span class="s2"> </span><span class="si">#{</span><span class="n">total_time_taken</span><span class="si">}</span><span class="s2"> &quot;</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Messy as hell, but it&#8217;s done the job for me.</p>
+
+<p>It showed me something interesting: each file that actually needs precompilation (rather than simply copying, as is the case for images) takes between 0.5 seconds and 3 seconds depending on how complex it is.</p>
+
+<p>The gem <code>ckeditor_rails</code> has about 100 or so Javascript files that are being individually compiled. Removing this gem reduces our precompilation time significantly:</p>
+
+<pre><code>real  0m35.728s
+user  0m45.032s
+sys   0m2.792s
+</code></pre>
+
+<p>So, I&#8217;ve taken the time from four minutes to thirty seconds. Let&#8217;s see how that affects our deployment time.</p>
+
+<p>Firstly, we&#8217;ll set a baseline by running chef without a pending deploy:</p>
+
+<pre><code>real  0m24.555s
+user  0m1.940s
+sys   0m0.560s
+</code></pre>
+
+<p>Next a deploy without the above optimisations:</p>
+
+<pre><code>real  4m6.257s
+user  3m46.870s
+sys   0m24.190s
+</code></pre>
+
+<p>Finally, use <code>asset:precompile:primary</code> and remove <code>ckeditor_rails</code>:</p>
+
+<pre><code>real  1m30.535s
+user  0m49.960s
+sys  0m5.690s
+</code></pre>
+
+<p>Four minutes down a much more reasonable one minute thirty! There&#8217;s still work to be done, but this is much better than we started with.</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -452,6 +606,10 @@ key, and added that key to my github project&#8217;s deploy keyset.</p>
 <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2012/03/18/reducing-asset-precompilation-time/">Reducing Asset Precompilation Time</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2011/08/18/discovering-un-pushed-git-repositories/">Discover Un-Pushed git Repositories</a>
