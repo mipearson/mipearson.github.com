@@ -4,7 +4,7 @@
   <title><![CDATA[Michael Pearson]]></title>
   <link href="http://mipearson.github.com//atom.xml" rel="self"/>
   <link href="http://mipearson.github.com//"/>
-  <updated>2012-09-27T22:31:48+10:00</updated>
+  <updated>2012-09-27T22:49:38+10:00</updated>
   <id>http://mipearson.github.com//</id>
   <author>
     <name><![CDATA[Michael Pearson]]></name>
@@ -191,9 +191,9 @@
 <p>I found the following helpful:</p>
 
 <ul>
-<li>[https://github.com/benhoskings/babushka]</li>
-<li>[http://babushka.me/how-deps-work], [http://babushka.me/writing-deps], [http://babushka.me/dep-examples]</li>
-<li>[https://github.com/conversation/babushka-deps]</li>
+<li>(https://github.com/benhoskings/babushka)</li>
+<li>(http://babushka.me/how-deps-work), (http://babushka.me/writing-deps), (http://babushka.me/dep-examples)</li>
+<li>(https://github.com/conversation/babushka-deps)</li>
 </ul>
 
 ]]></content>
