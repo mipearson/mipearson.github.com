@@ -9,7 +9,7 @@
   <meta name="author" content="Michael Pearson">
 
   
-  <meta name="description" content="We deploy to our test environment generally between five and twenty times a day. As we like our test environment to provide a solid indicator of &hellip;">
+  <meta name="description" content="BikeExchange are moving from a Ubuntu 10.04 virtual machine to a Ubuntu 12.04 bare metal behemoth. We have existing chef cookbooks that would make &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -79,6 +79,219 @@
       <div id="content">
         <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/09/27/babushka/">Babushka, Day One</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-09-27T22:28:00+10:00" pubdate data-updated="true">Sep 27<span>th</span>, 2012</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><a href="http://www.bikeexchange.com.au">BikeExchange</a> are moving from a Ubuntu 10.04 virtual machine to a Ubuntu 12.04 bare metal behemoth. We have existing chef cookbooks that would make this easier, but:</p>
+
+<ul>
+<li>I&#8217;m the only person in the organisation who knows how they work</li>
+<li>We use maybe 25% of <a href="http://www.opscode.com/chef/">chef</a> and the other 75% gets in the way</li>
+<li>I need to rewrite big chunks from scratch to properly support <a href="http://www.tinitrader.com.au">TiniTrader</a></li>
+</ul>
+
+
+<p>A discussion about <a href="http://ansible.cc/">ansible</a> on <a href="http://freenode.net/">#roro</a> today led me to think about giving at try instead. Simple YAML files! No daemons! No fucking <a href="http://projects.puppetlabs.com/projects/1/wiki/certificates_and_security">keysigning</a>! Party time!</p>
+
+<p>Then, <a href="https://twitter.com/andy_snow">Andy Snow</a> said (I&#8217;m paraphrasing) &#8220;You&#8217;re a pussy, you should give <a href="http://babushka.me">babushka</a> a go instead.&#8221;</p>
+
+<p>So that this knowledge isn&#8217;t lost, and as the babushka documention is pretty mixed [think Rails 3 before all the (guides)[http://guides.rubyonrails.org] got re-written), I&#8217;m documenting my experiences converting our chef cookbooks from scratch.</p>
+
+<h2>Bootstrapping Vagrant</h2>
+
+<p><a href="http://vagrantup.com">Vagrant</a> doesn&#8217;t support babushka out of the box, like puppet or chef. I prefer that: while I&#8217;m creating these things I like to work with them live rather than have vagrant do the heavy lifting for me.</p>
+
+<p>My first step was to update <a href="https://www.virtualbox.org">VirtualBox</a> and vagrant. Easy.</p>
+
+<p>I grabbed an official <a href="https://github.com/mitchellh/vagrant/wiki/Available-Vagrant-Boxes">Ubuntu 12.04 Precise Pangolin 64-bit image</a>.</p>
+
+<p>Installed babushka, following Ben&#8217;s <a href="http://babushka.me/installing">instructions</a>:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='shell'><span class='line'>vagrant ssh
+</span><span class='line'>sudo apt-get install curl
+</span><span class='line'>sudo bash -c <span class="s2">&quot;`curl https://babushka.me/up`&quot;</span>
+</span><span class='line'><span class="nb">exit</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>I&#8217;ll be working on my babushka configuration right in my repository, so I set up a symlink between that and where babushka expects to find its configuration:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='shell'><span class='line'>vagrant ssh
+</span><span class='line'>sudo bash
+</span><span class='line'><span class="nb">cd</span> /root/.babushka
+</span><span class='line'>ln -si /vagrant/babushka-deps/ deps
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>So that I didn&#8217;t need to repeat these steps if I wanted to start from a &#8216;fresh&#8217; machine, I packaged what I had as a new vagrant box:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='shell'><span class='line'>vagrant package
+</span><span class='line'>vagrant box add precise64-babushka package.box
+</span><span class='line'><span class="c"># edit Vagrantfile, replace box with precise64-babushka</span>
+</span><span class='line'>rm package.box <span class="c"># (don&#39;t need it no more)</span>
+</span><span class='line'>vagrant destroy <span class="c"># (as above)</span>
+</span><span class='line'>vagrant up
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Proof of Concept Babushka Dep</h3>
+
+<p>Babushka works on a concept of &#8216;deps&#8217;. You specify a condition and how to meet that condition. It&#8217;s got more in common with puppet than chef, and more in common with TDD than both of those.</p>
+
+<p>The very first step in our chef configuration is to lock the timezone to UTC. Let&#8217;s try writing a dep that does just that:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">dep</span> <span class="s2">&quot;timezone set&quot;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">met?</span> <span class="p">{</span> <span class="n">shell</span><span class="p">(</span><span class="s2">&quot;date +%Z&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;UTC&quot;</span> <span class="p">}</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>And run it:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='shell'><span class='line'>root@precise64:/root/.babushka/deps# babushka <span class="s1">&#39;personal:timezone set to UTC&#39;</span>
+</span><span class='line'>timezone <span class="nb">set </span>to UTC <span class="o">{</span>
+</span><span class='line'><span class="o">}</span> ✓ timezone <span class="nb">set </span>to UTC
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Looks like this box is already already UTC! Okay, let&#8217;s paramaterize it and use EST:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">dep</span> <span class="s2">&quot;timezone set&quot;</span><span class="p">,</span> <span class="ss">:timezone</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">met?</span> <span class="p">{</span> <span class="n">shell</span><span class="p">(</span><span class="s2">&quot;date +%Z&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="n">timezone</span> <span class="p">}</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Much better:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='shell'><span class='line'>root@precise64:/root/.babushka/deps# babushka <span class="s1">&#39;personal:timezone set&#39;</span> <span class="nv">timezone</span><span class="o">=</span>EST
+</span><span class='line'>timezone <span class="nb">set</span> <span class="o">{</span>
+</span><span class='line'>  meet <span class="o">{</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'><span class="o">}</span> ✗ timezone <span class="nb">set</span>
+</span><span class='line'>You can view a more detailed log at <span class="s1">&#39;/root/.babushka/logs/timezone set&#39;</span>.
+</span><span class='line'>
+</span><span class='line'>root@precise64:/root/.babushka/deps# babushka <span class="s1">&#39;personal:timezone set&#39;</span> <span class="nv">timezone</span><span class="o">=</span>UTC
+</span><span class='line'>timezone <span class="nb">set</span> <span class="o">{</span>
+</span><span class='line'><span class="o">}</span> ✓ timezone <span class="nb">set</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Finally, we&#8217;ll grab the commands from our chef config and set the timezone:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">dep</span> <span class="s2">&quot;timezone set&quot;</span><span class="p">,</span> <span class="ss">:timezone</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">met?</span> <span class="p">{</span> <span class="n">shell</span><span class="p">(</span><span class="s2">&quot;date +%Z&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="n">timezone</span> <span class="p">}</span>
+</span><span class='line'>  <span class="n">meet</span> <span class="p">{</span>
+</span><span class='line'>    <span class="s1">&#39;/etc/timezone&#39;</span><span class="o">.</span><span class="n">p</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">timezone</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">shell</span> <span class="s2">&quot;dpkg-reconfigure --frontend noninteractive tzdata&quot;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='shell'><span class='line'>root@precise64:/root/.babushka/deps# babushka <span class="s1">&#39;personal:timezone set&#39;</span> <span class="nv">timezone</span><span class="o">=</span>EST
+</span><span class='line'>timezone <span class="nb">set</span> <span class="o">{</span>
+</span><span class='line'>  meet <span class="o">{</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'><span class="o">}</span> ✓ timezone <span class="nb">set</span>
+</span><span class='line'>
+</span><span class='line'>root@precise64:/root/.babushka/deps# date
+</span><span class='line'>Thu Sep 27 06:59:47 EST 2012
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Additional Resources</h2>
+
+<p>I found the following helpful:</p>
+
+<ul>
+<li>[https://github.com/benhoskings/babushka]</li>
+<li>[http://babushka.me/how-deps-work], [http://babushka.me/writing-deps], [http://babushka.me/dep-examples]</li>
+<li>[https://github.com/conversation/babushka-deps]</li>
+</ul>
+
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -619,6 +832,10 @@ key, and added that key to my github project&#8217;s deploy keyset.</p>
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2012/09/27/babushka/">Babushka, Day One</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2012/03/18/reducing-asset-precompilation-time/">Reducing Asset Precompilation Time</a>
       </li>
     
@@ -688,4 +905,3 @@ key, and added that key to my github project&#8217;s deploy keyset.</p>
   <div id="bg1"></div>
 </body>
 </html>
-
