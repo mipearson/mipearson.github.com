@@ -4,7 +4,7 @@
   <title><![CDATA[Michael Pearson]]></title>
   <link href="http://mipearson.github.com//atom.xml" rel="self"/>
   <link href="http://mipearson.github.com//"/>
-  <updated>2012-09-30T00:05:46+10:00</updated>
+  <updated>2012-09-30T00:16:07+10:00</updated>
   <id>http://mipearson.github.com//</id>
   <author>
     <name><![CDATA[Michael Pearson]]></name>
@@ -330,7 +330,7 @@
 
 <p>There&#8217;s little documentation &#8220;in the wild&#8221; about the best way to structure certain things in babushka. Most of my understanding has been from reading The Conversation&#8217;s deps. Based on conversations with Ben, I&#8217;m beginning to assume that some of the patterns in use there are soon to be deprecated or are non-ideal. Lacking a shared understanding of the right way to do things (which I feel is necessary when learning a new technology: just see how most people ended up using Cucumber!), I&#8217;m left wondering whether I&#8217;m actually spending all my time heading down the wrong path.</p>
 
-<p>However, RailsCamp 12 is coming up next month, and I&#8217;ve been looking for a project to hack on. I&#8217;m considering spending some time adding creating a &#8216;stdlib&#8217; of deps (borrowing from the chef resources) to make migration easier and maybe even work on the documentation, if I can get drunk enough.</p>
+<p>However, RailsCamp 12 is coming up next month, and I&#8217;ve been looking for a project to hack on. I&#8217;m considering spending some time adding creating a &#8216;stdlib&#8217; of deps (borrowing from the chef resources) to make migration easier and maybe even work on the documentation.</p>
 ]]></content>
   </entry>
   
