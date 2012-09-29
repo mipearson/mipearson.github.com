@@ -4,7 +4,7 @@
   <title><![CDATA[Michael Pearson]]></title>
   <link href="http://mipearson.github.com//atom.xml" rel="self"/>
   <link href="http://mipearson.github.com//"/>
-  <updated>2012-09-27T22:50:34+10:00</updated>
+  <updated>2012-09-30T00:05:46+10:00</updated>
   <id>http://mipearson.github.com//</id>
   <author>
     <name><![CDATA[Michael Pearson]]></name>
@@ -12,6 +12,327 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Babushka, Day Two]]></title>
+    <link href="http://mipearson.github.com//blog/2012/09/30/babushka/"/>
+    <updated>2012-09-30T00:00:00+10:00</updated>
+    <id>http://mipearson.github.com//blog/2012/09/30/babushka</id>
+    <content type="html"><![CDATA[<h2>Add logging to timezone set</h2>
+
+<p>I&#8217;d like to know that we&#8217;ve actually set the timezone correctly, and Babushka&#8217;s console output is lovely. Let&#8217;s add to that:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">dep</span> <span class="s2">&quot;timezone set&quot;</span><span class="p">,</span> <span class="ss">:timezone</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">met?</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">current_tz</span> <span class="o">=</span> <span class="n">shell</span><span class="p">(</span><span class="s2">&quot;date +%Z&quot;</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">log</span> <span class="s2">&quot;system timezone is </span><span class="si">#{</span><span class="n">current_tz</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>    <span class="n">current_tz</span> <span class="o">==</span> <span class="n">timezone</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>  <span class="n">meet</span> <span class="p">{</span>
+</span><span class='line'>    <span class="s1">&#39;/etc/timezone&#39;</span><span class="o">.</span><span class="n">p</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">timezone</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">shell</span> <span class="s2">&quot;dpkg-reconfigure --frontend noninteractive tzdata&quot;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>root@precise64:~# babushka <span class="s2">&quot;personal:timezone set&quot;</span> <span class="nv">timezone</span><span class="o">=</span>UTC
+</span><span class='line'>timezone <span class="nb">set</span> <span class="o">{</span>
+</span><span class='line'>  System timezone is EST
+</span><span class='line'>  meet <span class="o">{</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>  System timezone is UTC
+</span><span class='line'><span class="o">}</span> ✓ timezone <span class="nb">set</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Remove AppArmor</h2>
+
+<p>I dislike AppArmor. I find it gets in the way more than it assists. Let&#8217;s nuke it.</p>
+
+<p>Is it installed by default in Ubuntu 12.04?</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>root@precise64:~# dpkg -l | grep apparmor
+</span><span class='line'>ii  apparmor                        2.7.102-0ubuntu3           User-space parser utility <span class="k">for </span>AppArmor
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Yep. Okay, how do we work out whether a package is installed? Diving into the babushka source shows us <code>PkgHelper</code>:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">dep</span> <span class="s2">&quot;remove apparmor&quot;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">met?</span> <span class="p">{</span> <span class="o">!</span> <span class="no">Babushka</span><span class="o">.</span><span class="n">host</span><span class="o">.</span><span class="n">pkg_helper</span><span class="o">.</span><span class="n">has?</span><span class="p">(</span><span class="s1">&#39;apparmor&#39;</span><span class="p">)}</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>remove apparmor <span class="o">{</span>
+</span><span class='line'>  ✓ system has apparmor deb
+</span><span class='line'>  meet <span class="o">{</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>  ✓ system has apparmor deb
+</span><span class='line'><span class="o">}</span> ✗ remove apparmor
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>PkgHelper</code> unfortunaely has no &#8220;remove package&#8221; function. We&#8217;ll shell out instead:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">dep</span> <span class="s2">&quot;remove apparmor&quot;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">met?</span> <span class="p">{</span> <span class="o">!</span> <span class="no">Babushka</span><span class="o">.</span><span class="n">host</span><span class="o">.</span><span class="n">pkg_helper</span><span class="o">.</span><span class="n">has?</span><span class="p">(</span><span class="s1">&#39;apparmor&#39;</span><span class="p">)}</span>
+</span><span class='line'>  <span class="n">meet</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">shell</span> <span class="s2">&quot;apt-get remove -y apparmor&quot;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>root@precise64:~# babushka <span class="s2">&quot;personal:remove apparmor&quot;</span>
+</span><span class='line'>remove apparmor <span class="o">{</span>
+</span><span class='line'>  ✓ system has apparmor deb
+</span><span class='line'>  meet <span class="o">{</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>  system doesn<span class="err">&#39;</span>t have apparmor deb
+</span><span class='line'><span class="o">}</span> ✓ remove apparmor
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Make sure we have our standard utility suite</h2>
+
+<p>Our chef base cookbook installs a bunch of packages:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># Packages</span>
+</span><span class='line'><span class="sx">%w{</span>
+</span><span class='line'><span class="sx">  build-essential binutils-doc autoconf flex bison</span>
+</span><span class='line'><span class="sx">  vim curl git-core sysstat libxml2-dev libxslt1-dev</span>
+</span><span class='line'><span class="sx">}</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="nb">p</span><span class="o">|</span>
+</span><span class='line'>  <span class="n">package</span> <span class="nb">p</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">action</span> <span class="ss">:install</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Unfortunately, I can&#8217;t remember exactly <em>why</em> some of these got installed. A couple of them are for Ruby, but we&#8217;ll install those later. I&#8217;m going to filter the above list and use babushka&#8217;s <code>.bin</code> template:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">dep</span> <span class="s1">&#39;vim.bin&#39;</span>
+</span><span class='line'><span class="n">dep</span> <span class="s1">&#39;git.bin&#39;</span>
+</span><span class='line'><span class="n">dep</span> <span class="s1">&#39;curl.bin&#39;</span>
+</span><span class='line'><span class="n">dep</span> <span class="s1">&#39;iostat.bin&#39;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">installs</span> <span class="s1">&#39;sysstat&#39;</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">dep</span> <span class="s2">&quot;standard binaries&quot;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">requires</span> <span class="sx">%w{vim.bin git.bin curl.bin iostat.bin}</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Note the <code>installs 'sysstat'</code>: the <code>.bin</code> template checks for the existence of the binary and installs the package of the same name if it doesn&#8217;t exist. This won&#8217;t work for <code>iostat</code>, which comes from the <code>sysstat</code> package.</p>
+
+<p>And run:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>root@precise64:~# babushka  <span class="s2">&quot;personal:standard binaries&quot;</span>
+</span><span class='line'>standard binaries <span class="o">{</span>
+</span><span class='line'>  vim.bin <span class="o">{</span>
+</span><span class='line'>    <span class="s1">&#39;vim&#39;</span> runs from /usr/bin.
+</span><span class='line'>  <span class="o">}</span> ✓ vim.bin
+</span><span class='line'>  git.bin <span class="o">{</span>
+</span><span class='line'>    <span class="s1">&#39;git&#39;</span> runs from /usr/bin.
+</span><span class='line'>  <span class="o">}</span> ✓ git.bin
+</span><span class='line'>  curl.bin <span class="o">{</span>
+</span><span class='line'>    <span class="s1">&#39;curl&#39;</span> runs from /usr/bin.
+</span><span class='line'>  <span class="o">}</span> ✓ curl.bin
+</span><span class='line'>  iostat.bin <span class="o">{</span>
+</span><span class='line'>    <span class="s1">&#39;iostat&#39;</span> is missing.
+</span><span class='line'>    apt <span class="o">{</span>
+</span><span class='line'>      package manager <span class="o">{</span>
+</span><span class='line'>        <span class="s1">&#39;apt-get&#39;</span> runs from /usr/bin.
+</span><span class='line'>      <span class="o">}</span> ✓ package manager
+</span><span class='line'>      apt <span class="nb">source</span> <span class="o">{</span>
+</span><span class='line'>      <span class="o">}</span> ✓ apt <span class="nb">source</span>
+</span><span class='line'><span class="nb">      </span>apt <span class="nb">source</span> <span class="o">{</span>
+</span><span class='line'>      <span class="o">}</span> ✓ apt <span class="nb">source</span>
+</span><span class='line'>    <span class="o">}</span> ✓ apt
+</span><span class='line'>    meet <span class="o">{</span>
+</span><span class='line'>      Installing sysstat via apt... <span class="k">done</span>.
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>    <span class="s1">&#39;iostat&#39;</span> runs from /usr/bin.
+</span><span class='line'>  <span class="o">}</span> ✓ iostat.bin
+</span><span class='line'><span class="o">}</span> ✓ standard binaries
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Gold.</p>
+
+<h2>NTP</h2>
+
+<p>We ensure that NTP is installed and talking to some Australian time servers to keep our clocks in sync. Our chef cookbook looks like:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">package</span> <span class="s1">&#39;ntp&#39;</span> <span class="c1"># Install ntp package</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">service</span> <span class="s1">&#39;ntp&#39;</span> <span class="k">do</span> <span class="c1"># Ensure that ntp starts on boot</span>
+</span><span class='line'>  <span class="n">action</span> <span class="ss">:enable</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">cookbook_file</span> <span class="s2">&quot;/etc/ntp.conf&quot;</span> <span class="k">do</span> <span class="c1"># Tell NTP to use .au time servers</span>
+</span><span class='line'>  <span class="n">mode</span> <span class="mo">0644</span>
+</span><span class='line'>  <span class="n">notifies</span> <span class="ss">:restart</span><span class="p">,</span> <span class="s2">&quot;service[ntp]&quot;</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Skipping right to the end, here&#8217;s the babushka version I ended up settling on:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">dep</span> <span class="s1">&#39;ntpd.bin&#39;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">installs</span> <span class="s1">&#39;ntp&#39;</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">dep</span> <span class="s2">&quot;ntp time synchronisation&quot;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">requires</span> <span class="s1">&#39;ntpd.bin&#39;</span>
+</span><span class='line'>  <span class="n">met?</span> <span class="p">{</span> <span class="no">Babushka</span><span class="o">::</span><span class="no">Renderable</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s2">&quot;/etc/ntp.conf&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">from?</span><span class="p">(</span><span class="n">dependency</span><span class="o">.</span><span class="n">load_path</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">&quot;ntp/ntp.conf&quot;</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'>  <span class="n">meet</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">render_erb</span> <span class="s1">&#39;ntp/ntp.conf&#39;</span><span class="p">,</span> <span class="ss">:to</span> <span class="o">=&gt;</span> <span class="s1">&#39;/etc/ntp.conf&#39;</span>
+</span><span class='line'>    <span class="n">shell</span> <span class="s2">&quot;service ntp restart&quot;</span>
+</span><span class='line'>    <span class="nb">sleep</span> <span class="mi">1</span> <span class="c1"># wait for ntp to come back up</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This originally had a <code>ntpq -p</code> test to make sure NTP was using the time servers we asked it to. Unfortunately, we use the <code>#.oceania.pool.ntp.org</code> aliases, and <code>ntpq -p</code> would only output the servers they actually CNAMEd to. An alternative would be to test for latency, but that&#8217;s too much effort for a small requirement like this.</p>
+
+<p>The <code>Babushka::Renderable</code> stuff is stolen from The Conversation&#8217;s <a href="https://github.com/conversation/babushka-deps">babushka-deps</a>. The <code>met?</code> condition fails if the rendered template would not match the template currently present.</p>
+
+<p>Personally, I&#8217;d be tempted to make this a first-class conditional, but I understand that&#8217;s my chef and puppet background at play. I&#8217;m assuming that it&#8217;s intentionally cumbersome to encourage people to check the actual outcomes of actions, not whether a particular file matches. Of course, there&#8217;s cases where file matching is desirable: I don&#8217;t want to manually have to trigger a <code>meet</code> condition if I update a webserver template, for example.</p>
+
+<h2>Thoughts</h2>
+
+<p>I&#8217;m ashamed to admit it, but I&#8217;m nearly at the point where I&#8217;ll need to shelve this project and continue the server rework using chef. Admittedly my expectation that I&#8217;d be able to duplicate a multi-cookbook configuration in babushka within a weekend was fairly optimistic, but I&#8217;ve run in to a couple of things that have made the process a bit more difficult than I&#8217;d anticipated.</p>
+
+<p>I&#8217;d assumed at the outset that babushka deps were written in much the same way as puppet manifests or chef cookbooks: &#8220;I expect this package to be installed, I expect this file to look like this&#8221;. Features and templates seem to have been deliberately ommitted from babushka to encourage a behavorial (rather than merely stateful) approach to depedency creation. While interesting, this has implications for idempotency that I&#8217;d taken for granted in chef and puppet.</p>
+
+<p>There&#8217;s little documentation &#8220;in the wild&#8221; about the best way to structure certain things in babushka. Most of my understanding has been from reading The Conversation&#8217;s deps. Based on conversations with Ben, I&#8217;m beginning to assume that some of the patterns in use there are soon to be deprecated or are non-ideal. Lacking a shared understanding of the right way to do things (which I feel is necessary when learning a new technology: just see how most people ended up using Cucumber!), I&#8217;m left wondering whether I&#8217;m actually spending all my time heading down the wrong path.</p>
+
+<p>However, RailsCamp 12 is coming up next month, and I&#8217;ve been looking for a project to hack on. I&#8217;m considering spending some time adding creating a &#8216;stdlib&#8217; of deps (borrowing from the chef resources) to make migration easier and maybe even work on the documentation, if I can get drunk enough.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Babushka, Day One]]></title>
@@ -191,9 +512,9 @@
 <p>I found the following helpful:</p>
 
 <ul>
-<li>(https://github.com/benhoskings/babushka)</li>
-<li>(http://babushka.me/how-deps-work), (http://babushka.me/writing-deps), (http://babushka.me/dep-examples)</li>
-<li>(https://github.com/conversation/babushka-deps)</li>
+<li><a href="https://github.com/benhoskings/babushka">Babushka at GitHub</a></li>
+<li><a href="http://babushka.me/how-deps-work">How Deps Work</a>, <a href="http://babushka.me/writing-deps">Writing Deps</a>, <a href="http://babushka.me/dep-examples">Dep Examples</a></li>
+<li><a href="https://github.com/conversation/babushka-deps">The Conversation&#8217;s Deps</a></li>
 </ul>
 
 ]]></content>
