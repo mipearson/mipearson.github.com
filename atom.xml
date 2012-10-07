@@ -4,7 +4,7 @@
   <title><![CDATA[Michael Pearson]]></title>
   <link href="http://mipearson.github.com//atom.xml" rel="self"/>
   <link href="http://mipearson.github.com//"/>
-  <updated>2012-10-08T08:21:45+11:00</updated>
+  <updated>2012-10-08T09:24:44+11:00</updated>
   <id>http://mipearson.github.com//</id>
   <author>
     <name><![CDATA[Michael Pearson]]></name>
@@ -128,7 +128,9 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>We&#8217;ll push that out to our test system, play around with some records to make sure that <code>created_at</code> and <code>updated_at</code> get set properly, and then push it to production.</p>
+<p>Once I&#8217;ve run <code>rake db:migrate</code>  on my development box I&#8217;ll run a global find and replace all instances of <code>creation_date</code> with <code>created_at</code>. I&#8217;ll then run our test suite and commit.</p>
+
+<p>I&#8217;ll push that out to our test system, play around with some records to make sure that <code>created_at</code> and <code>updated_at</code> get set properly, and then push it to production.</p>
 
 <h3>Our Second Migration</h3>
 
