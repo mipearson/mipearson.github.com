@@ -163,15 +163,15 @@
 
 <h2>Do the Two-Step</h2>
 
-<p>To work around this we&#8217;re going to split the above migration and prepare for multiple deployments:</p>
+<p>To work around this I&#8217;m going to split the above migration and prepare for multiple deployments:</p>
 
 <ul>
-<li><p>Our first migration will create new <code>created_at</code> and <code>updated_at</code> columns and deploy code to use these new columns instead.</p></li>
-<li><p>Our second migration will remove the now unused <code>creation_date</code> column.</p></li>
+<li><p>My first migration will create new <code>created_at</code> and <code>updated_at</code> columns and deploy code to use these new columns instead.</p></li>
+<li><p>My second migration will remove the now unused <code>creation_date</code> column.</p></li>
 </ul>
 
 
-<p>Simple, yeah? We let our running application use the new column name before we remove the old one.</p>
+<p>Simple, yeah? I let our running application use the new column name before I remove the old one.</p>
 
 <h3>Our First Migration</h3>
 
@@ -255,7 +255,7 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>Note the use of <code>IrreversibleMigration</code> above. I prefer to flag that a migration can&#8217;t be reversed this way rather than leave a <code>down</code> method that provides a false positive. We will also remove the <code>DEFAULT now()</code>: ActiveRecord will always set these values, any other behaviour should be considered an error.</p>
+<p>Note the use of <code>IrreversibleMigration</code> above. I prefer to flag that a migration can&#8217;t be reversed this way rather than leave a <code>down</code> method that provides a false positive. I will also remove the <code>DEFAULT now()</code>: ActiveRecord will always set these values, any other behaviour should be considered an error.</p>
 
 <p>This migration gets pushed to our test system only when the first migration and deploy has successfully run on both our test and production systems and all automated tests have passed.</p>
 
