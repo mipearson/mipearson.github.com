@@ -4,7 +4,7 @@
   <title><![CDATA[Michael Pearson]]></title>
   <link href="http://mipearson.github.com//atom.xml" rel="self"/>
   <link href="http://mipearson.github.com//"/>
-  <updated>2012-10-08T08:20:26+11:00</updated>
+  <updated>2012-10-08T08:21:45+11:00</updated>
   <id>http://mipearson.github.com//</id>
   <author>
     <name><![CDATA[Michael Pearson]]></name>
@@ -105,7 +105,7 @@
 <span class='line-number'>18</span>
 <span class='line-number'>19</span>
 <span class='line-number'>20</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">AddCreatedUpdatedColumsnToAdvertAndEmail</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Migration</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">AddCreatedUpdatedColums</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Migration</span>
 </span><span class='line'>  <span class="k">def</span> <span class="nf">up</span>
 </span><span class='line'>    <span class="sx">%w{all the tables}</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">table</span><span class="o">|</span>
 </span><span class='line'>      <span class="n">add_column</span> <span class="n">table</span><span class="p">,</span> <span class="ss">:created_at</span><span class="p">,</span> <span class="ss">:datetime</span><span class="p">,</span> <span class="s2">&quot;DEFAULT now() NOT NULL&quot;</span>
