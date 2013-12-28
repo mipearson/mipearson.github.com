@@ -1,0 +1,204 @@
+---
+layout: post
+title: "Babushka, Day Two"
+date: 2012-09-30 00:00
+comments: true
+categories:
+---
+
+## Add logging to timezone set
+
+I'd like to know that we've actually set the timezone correctly, and Babushka's console output is lovely. Let's add to that:
+
+```ruby
+dep "timezone set", :timezone do
+  met? {
+    current_tz = shell("date +%Z")
+    log "system timezone is #{current_tz}"
+    current_tz == timezone
+  }
+  meet {
+    '/etc/timezone'.p.write(timezone)
+    shell "dpkg-reconfigure --frontend noninteractive tzdata"
+  }
+end
+```
+
+```sh
+root@precise64:~# babushka "personal:timezone set" timezone=UTC
+timezone set {
+  System timezone is EST
+  meet {
+  }
+  System timezone is UTC
+} ✓ timezone set
+```
+
+## Remove AppArmor
+
+I dislike AppArmor. I find it gets in the way more than it assists. Let's nuke it.
+
+Is it installed by default in Ubuntu 12.04?
+
+```sh
+root@precise64:~# dpkg -l | grep apparmor
+ii  apparmor                        2.7.102-0ubuntu3           User-space parser utility for AppArmor
+```
+
+Yep. Okay, how do we work out whether a package is installed? Diving into the babushka source shows us `PkgHelper`:
+
+```ruby
+dep "remove apparmor" do
+  met? { ! Babushka.host.pkg_helper.has?('apparmor')}
+end
+```
+
+```sh
+remove apparmor {
+  ✓ system has apparmor deb
+  meet {
+  }
+  ✓ system has apparmor deb
+} ✗ remove apparmor
+```
+
+`PkgHelper` unfortunaely has no "remove package" function. We'll shell out instead:
+
+```ruby
+dep "remove apparmor" do
+  met? { ! Babushka.host.pkg_helper.has?('apparmor')}
+  meet {
+    shell "apt-get remove -y apparmor"
+  }
+end
+```
+
+```sh
+root@precise64:~# babushka "personal:remove apparmor"
+remove apparmor {
+  ✓ system has apparmor deb
+  meet {
+  }
+  system doesn't have apparmor deb
+} ✓ remove apparmor
+```
+
+## Make sure we have our standard utility suite
+
+Our chef base cookbook installs a bunch of packages:
+
+```ruby
+# Packages
+%w{
+  build-essential binutils-doc autoconf flex bison
+  vim curl git-core sysstat libxml2-dev libxslt1-dev
+}.each do |p|
+  package p do
+    action :install
+  end
+end
+```
+
+Unfortunately, I can't remember exactly *why* some of these got installed. A couple of them are for Ruby, but we'll install those later. I'm going to filter the above list and use babushka's `.bin` template:
+
+```ruby
+dep 'vim.bin'
+dep 'git.bin'
+dep 'curl.bin'
+dep 'iostat.bin' do
+  installs 'sysstat'
+end
+
+dep "standard binaries" do
+  requires %w{vim.bin git.bin curl.bin iostat.bin}
+end
+```
+
+Note the `installs 'sysstat'`: the `.bin` template checks for the existence of the binary and installs the package of the same name if it doesn't exist. This won't work for `iostat`, which comes from the `sysstat` package.
+
+And run:
+
+```sh
+root@precise64:~# babushka  "personal:standard binaries"
+standard binaries {
+  vim.bin {
+    'vim' runs from /usr/bin.
+  } ✓ vim.bin
+  git.bin {
+    'git' runs from /usr/bin.
+  } ✓ git.bin
+  curl.bin {
+    'curl' runs from /usr/bin.
+  } ✓ curl.bin
+  iostat.bin {
+    'iostat' is missing.
+    apt {
+      package manager {
+        'apt-get' runs from /usr/bin.
+      } ✓ package manager
+      apt source {
+      } ✓ apt source
+      apt source {
+      } ✓ apt source
+    } ✓ apt
+    meet {
+      Installing sysstat via apt... done.
+    }
+    'iostat' runs from /usr/bin.
+  } ✓ iostat.bin
+} ✓ standard binaries
+```
+
+Gold.
+
+## NTP
+
+We ensure that NTP is installed and talking to some Australian time servers to keep our clocks in sync. Our chef cookbook looks like:
+
+```ruby
+package 'ntp' # Install ntp package
+
+service 'ntp' do # Ensure that ntp starts on boot
+  action :enable
+end
+
+cookbook_file "/etc/ntp.conf" do # Tell NTP to use .au time servers
+  mode 0644
+  notifies :restart, "service[ntp]"
+end
+```
+
+Skipping right to the end, here's the babushka version I ended up settling on:
+
+```ruby
+dep 'ntpd.bin' do
+  installs 'ntp'
+end
+
+dep "ntp time synchronisation" do
+  requires 'ntpd.bin'
+  met? { Babushka::Renderable.new("/etc/ntp.conf").from?(dependency.load_path.parent / "ntp/ntp.conf") }
+  meet {
+    render_erb 'ntp/ntp.conf', :to => '/etc/ntp.conf'
+    shell "service ntp restart"
+    sleep 1 # wait for ntp to come back up
+  }
+end
+```
+
+This originally had a `ntpq -p` test to make sure NTP was using the time servers we asked it to. Unfortunately, we use the `#.oceania.pool.ntp.org` aliases, and `ntpq -p` would only output the servers they actually CNAMEd to. An alternative would be to test for latency, but that's too much effort for a small requirement like this.
+
+The `Babushka::Renderable` stuff is stolen from The Conversation's [babushka-deps](https://github.com/conversation/babushka-deps). The `met?` condition fails if the rendered template would not match the template currently present.
+
+Personally, I'd be tempted to make this a first-class conditional, but I understand that's my chef and puppet background at play. I'm assuming that it's intentionally cumbersome to encourage people to check the actual outcomes of actions, not whether a particular file matches. Of course, there's cases where file matching is desirable: I don't want to manually have to trigger a `meet` condition if I update a webserver template, for example.
+
+## Thoughts
+
+I'm ashamed to admit it, but I'm nearly at the point where I'll need to shelve this project and continue the server rework using chef. Admittedly my expectation that I'd be able to duplicate a multi-cookbook configuration in babushka within a weekend was fairly optimistic, but I've run in to a couple of things that have made the process a bit more difficult than I'd anticipated.
+
+I'd assumed at the outset that babushka deps were written in much the same way as puppet manifests or chef cookbooks: "I expect this package to be installed, I expect this file to look like this". Features and templates seem to have been deliberately ommitted from babushka to encourage a behavorial (rather than merely stateful) approach to depedency creation. While interesting, this has implications for idempotency that I'd taken for granted in chef and puppet.
+
+There's little documentation "in the wild" about the best way to structure certain things in babushka. Most of my understanding has been from reading The Conversation's deps. Based on conversations with Ben, I'm beginning to assume that some of the patterns in use there are soon to be deprecated or are non-ideal. Lacking a shared understanding of the right way to do things (which I feel is necessary when learning a new technology: just see how most people ended up using Cucumber!), I'm left wondering whether I'm actually spending all my time heading down the wrong path.
+
+However, RailsCamp 12 is coming up next month, and I've been looking for a project to hack on. I'm considering spending some time adding creating a 'stdlib' of deps (borrowing from the chef resources) to make migration easier and maybe even work on the documentation.
+
