@@ -28,7 +28,7 @@ I grabbed an official [Ubuntu 12.04 Precise Pangolin 64-bit image](https://githu
 
 Installed babushka, following Ben's [instructions](http://babushka.me/installing):
 
-``` shell
+``` bash
 vagrant ssh
 sudo apt-get install curl
 sudo bash -c "`curl https://babushka.me/up`"
@@ -37,7 +37,7 @@ exit
 
 I'll be working on my babushka configuration right in my repository, so I set up a symlink between that and where babushka expects to find its configuration:
 
-``` shell
+``` bash
 vagrant ssh
 sudo bash
 cd /root/.babushka
@@ -46,7 +46,7 @@ ln -si /vagrant/babushka-deps/ deps
 
 So that I didn't need to repeat these steps if I wanted to start from a 'fresh' machine, I packaged what I had as a new vagrant box:
 
-``` shell
+``` bash
 vagrant package
 vagrant box add precise64-babushka package.box
 # edit Vagrantfile, replace box with precise64-babushka
@@ -69,7 +69,7 @@ end
 
 And run it:
 
-``` shell
+``` bash
 root@precise64:/root/.babushka/deps# babushka 'personal:timezone set to UTC'
 timezone set to UTC {
 } ✓ timezone set to UTC
@@ -85,7 +85,7 @@ end
 
 Much better:
 
-``` shell
+``` bash
 root@precise64:/root/.babushka/deps# babushka 'personal:timezone set' timezone=EST
 timezone set {
   meet {
@@ -110,7 +110,7 @@ dep "timezone set", :timezone do
 end
 ```
 
-``` shell
+``` bash
 root@precise64:/root/.babushka/deps# babushka 'personal:timezone set' timezone=EST
 timezone set {
   meet {
