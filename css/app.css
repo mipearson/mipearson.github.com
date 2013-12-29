@@ -1,0 +1,23 @@
+/* http://timkadlec.com/2013/01/windows-phone-8-and-device-width/ */
+@-webkit-viewport{width:device-width}
+@-moz-viewport{width:device-width}
+@-ms-viewport{width:device-width}
+@-o-viewport{width:device-width}
+@viewport{width:device-width}
+
+body {
+  background: #000000;
+}
+.content {
+  background: #ffffff;
+}
+.sidebar {
+  position: fixed;
+  right: 0;
+  top: 0;
+  width: 25%;
+  margin-bottom: 0;
+
+  background: url('/images/bg.jpg') no-repeat top left #000000;
+  height: 900px;
+}
